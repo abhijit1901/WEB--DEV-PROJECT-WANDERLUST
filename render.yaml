@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: node app.js
+    envVars:
+      - key: MONGODB_URI
+        value: "mongodb+srv://abhijitjha1801:LiRAiaMKMt9VT2au@cluster0.lv7mi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+      - key: PORT
+        value: "5000"
