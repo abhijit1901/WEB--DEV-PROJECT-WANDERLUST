@@ -1,0 +1,24 @@
+first do npm init -y to initialize package.json(it manages
+dependencies and contains the project name, version, description, author, license, etc.)
+
+
+after that do 
+[npm i express : What it Does:
+                Installs the Express package, a web framework for Node.js.
+
+                Adds express to the dependencies field in package.json.
+
+npm i ejs : What it Does:
+                Installs the EJS (Embedded JavaScript) templating engine.
+
+                Adds ejs to the dependencies field in package.json.
+
+npm i mongoose : What it Does:
+                Installs Mongoose, an Object Data Modeling (ODM) library for MongoDB and Node.js.
+                
+                Adds mongoose to the dependencies field in package.json.] 
+
+npm i ejs-mate : What it Does:
+                Allows you to define a common layout for your application (e.g., a consistent header, footer, or sidebar).
+                
+                You can use a base file (like layout.ejs) to wrap around your content, avoiding repetitive code in each view.

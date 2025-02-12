@@ -1,0 +1,95 @@
+<% layout("/layouts/boilerplates.ejs") %>
+<body style="background-image: linear-gradient(163deg, #ffffff 0%, #ff0000 100%);" class="bg-light">
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <form class="p-4 bg-white shadow rounded needs-validation" action="/login" method="POST" novalidate style="max-width: 350px; width: 100%;">
+      <h4 class="text-center fw-bold mb-3" style="color: #ff0000;">Log In</h4>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label class="form-label" for="username" style="color: #ff0000;">Username</label>
+        <div class="input-group">
+          <span class="input-group-text" style="background-color: #f8f9fa; border-color: #ced4da;">
+            <i class="bi bi-envelope" style="color: #ff0000;"></i>
+          </span>
+          <input 
+            name="username" 
+            id="username" 
+            type="text" 
+            class="form-control" 
+            placeholder="Enter username" 
+            required />
+          <div class="invalid-feedback">
+            enter your username.
+          </div>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label class="form-label" for="password" style="color: #ff0000;">Password</label>
+        <div class="input-group">
+          <span class="input-group-text" style="background-color: #f8f9fa; border-color: #ced4da;">
+            <i class="bi bi-lock" style="color: #ff0000;"></i>
+          </span>
+          <input 
+            name="password"
+            id="password" 
+            type="password" 
+            class="form-control" 
+            placeholder="Enter password" 
+            required />
+          <button class="btn btn-outline-secondary password-toggle" type="button">
+            <i class="bi bi-eye" style="color: #ff0000;"></i>
+          </button>
+          <div class="invalid-feedback">
+            enter password.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sign In Button -->
+      <button type="submit" class="btn btn-danger w-100">Log In</button>
+
+      <!-- Sign Up Link -->
+      <div class="text-center mt-3" style="color: #ff0000;">
+        Don't have an account?
+        <a href="/signup" style="text-decoration: none;" class="text-dark">
+          <br><br><span class="fw-bold button-login-signup">Sign Up</span>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Bootstrap validation script
+    (function () {
+      'use strict';
+      document.addEventListener('DOMContentLoaded', function () {
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      });
+    })();
+
+    // Password toggle script
+    document.addEventListener('DOMContentLoaded', function () {
+      const toggleButton = document.querySelector('.password-toggle');
+      const passwordInput = document.querySelector('#password');
+
+      toggleButton.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        toggleButton.innerHTML = type === 'password'
+          ? '<i class="bi bi-eye" style="color: #000;"></i>'
+          : '<i class="bi bi-eye-slash" style="color: #000;"></i>';
+      });
+    });
+  </script>
+</body>

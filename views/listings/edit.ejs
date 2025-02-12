@@ -1,0 +1,701 @@
+<% layout("/layouts/boilerplates.ejs")%>
+<style>
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .category-item {
+        position: relative;
+    }
+    
+    .category-item input[type="checkbox"] {
+        display: none;
+    }
+    
+    .category-item label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .category-item label i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .category-item input[type="checkbox"]:checked + label {
+        border-color: #2196F3;
+        background: rgba(33, 150, 243, 0.1);
+        transform: scale(1.05);
+    }
+    /* Loader container */
+    #page-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    /* Typewriter animation */
+    .typewriter {
+        --blue: #5C86FF;
+        --blue-dark: #275EFE;
+        --key: #fff;
+        --paper: #EEF0FD;
+        --text: #D3D4EC;
+        --tool: #FBC56C;
+        --duration: 3s;
+        position: relative;
+        -webkit-animation: bounce05 var(--duration) linear infinite;
+        animation: bounce05 var(--duration) linear infinite;
+    }
+    .typewriter .slide {
+  width: 92px;
+  height: 20px;
+  border-radius: 3px;
+  margin-left: 14px;
+  transform: translateX(14px);
+  background: linear-gradient(var(--blue), var(--blue-dark));
+  -webkit-animation: slide05 var(--duration) ease infinite;
+  animation: slide05 var(--duration) ease infinite;
+    }
+    .typewriter .slide:before, .typewriter .slide:after,
+    .typewriter .slide i:before {
+    content: "";
+    position: absolute;
+    background: var(--tool);
+    }
+
+    .typewriter .slide:before {
+    width: 2px;
+    height: 8px;
+    top: 6px;
+    left: 100%;
+    }
+
+    .typewriter .slide:after {
+    left: 94px;
+    top: 3px;
+    height: 14px;
+    width: 6px;
+    border-radius: 3px;
+    }
+
+    .typewriter .slide i {
+    display: block;
+    position: absolute;
+    right: 100%;
+    width: 6px;
+    height: 4px;
+    top: 4px;
+    background: var(--tool);
+    }
+
+    .typewriter .slide i:before {
+    right: 100%;
+    top: -2px;
+    width: 4px;
+    border-radius: 2px;
+    height: 14px;
+    }
+
+    .typewriter .paper {
+    position: absolute;
+    left: 24px;
+    top: -26px;
+    width: 40px;
+    height: 46px;
+    border-radius: 5px;
+    background: var(--paper);
+    transform: translateY(46px);
+    -webkit-animation: paper05 var(--duration) linear infinite;
+    animation: paper05 var(--duration) linear infinite;
+    }
+
+    .typewriter .paper:before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 7px;
+    border-radius: 2px;
+    height: 4px;
+    transform: scaleY(0.8);
+    background: var(--text);
+    box-shadow: 0 12px 0 var(--text), 0 24px 0 var(--text), 0 36px 0 var(--text);
+    }
+
+    .typewriter .keyboard {
+    width: 120px;
+    height: 56px;
+    margin-top: -10px;
+    z-index: 1;
+    position: relative;
+    }
+
+    .typewriter .keyboard:before, .typewriter .keyboard:after {
+    content: "";
+    position: absolute;
+    }
+
+    .typewriter .keyboard:before {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    transform: perspective(10px) rotateX(2deg);
+    transform-origin: 50% 100%;
+    }
+
+    .typewriter .keyboard:after {
+    left: 2px;
+    top: 25px;
+    width: 11px;
+    height: 4px;
+    border-radius: 2px;
+    box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    -webkit-animation: keyboard05 var(--duration) linear infinite;
+    animation: keyboard05 var(--duration) linear infinite;
+    }
+
+    @keyframes bounce05 {
+    85%, 92%, 100% {
+        transform: translateY(0);
+    }
+
+    89% {
+        transform: translateY(-4px);
+    }
+
+    95% {
+        transform: translateY(2px);
+    }
+    }
+
+    @keyframes slide05 {
+    5% {
+        transform: translateX(14px);
+    }
+
+    15%, 30% {
+        transform: translateX(6px);
+    }
+
+    40%, 55% {
+        transform: translateX(0);
+    }
+
+    65%, 70% {
+        transform: translateX(-4px);
+    }
+
+    80%, 89% {
+        transform: translateX(-12px);
+    }
+
+    100% {
+        transform: translateX(14px);
+    }
+    }
+
+    @keyframes paper05 {
+    5% {
+        transform: translateY(46px);
+    }
+
+    20%, 30% {
+        transform: translateY(34px);
+    }
+
+    40%, 55% {
+        transform: translateY(22px);
+    }
+
+    65%, 70% {
+        transform: translateY(10px);
+    }
+
+    80%, 85% {
+        transform: translateY(0);
+    }
+
+    92%, 100% {
+        transform: translateY(46px);
+    }
+    }
+
+    @keyframes keyboard05 {
+    5%, 12%, 21%, 30%, 39%, 48%, 57%, 66%, 75%, 84% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    9% {
+        box-shadow: 15px 2px 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    18% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 2px 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    27% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 12px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    36% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 12px 0 var(--key), 60px 12px 0 var(--key), 68px 12px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    45% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 2px 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    54% {
+        box-shadow: 15px 0 0 var(--key), 30px 2px 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    63% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 12px 0 var(--key);
+    }
+
+    72% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 2px 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 10px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+
+    81% {
+        box-shadow: 15px 0 0 var(--key), 30px 0 0 var(--key), 45px 0 0 var(--key), 60px 0 0 var(--key), 75px 0 0 var(--key), 90px 0 0 var(--key), 22px 10px 0 var(--key), 37px 12px 0 var(--key), 52px 10px 0 var(--key), 60px 10px 0 var(--key), 68px 10px 0 var(--key), 83px 10px 0 var(--key);
+    }
+    }
+    /* Add to your existing styles */
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    #page-loader {
+        transition: opacity 0.5s ease-out;
+    }
+
+    #page-content {
+        transition: opacity 0.5s ease-in;
+        min-height: 100vh;
+    }
+
+    /* Optional: Add fade-in animation for content */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in forwards;
+    }
+</style>
+<body style="background: linear-gradient(120deg, #fff5f5 60%, #fff0f0 88%,
+       #fff5f5 40%, rgba(255, 245, 245, 0.603) 48%);"> 
+    <!-- Add loader container -->
+    <div id="loader-container">
+        <div class="typewriter">
+            <div class="slide"><i></i></div>
+            <div class="paper"></div>
+            <div class="keyboard"></div>
+        </div>
+        <div class="sub-text"></div>
+    </div>
+
+    <div class="edit-container content-container">
+        <h3 class="edit-title">✨ Edit Your Listing</h3>
+        <form method="POST" action="/listings/<%=listing._id%>?_method=PUT" enctype="multipart/form-data" novalidate class="needs-validation" id="listingForm">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input name="listing[title]" value="<%=listing.title%>" class="form-control"type="text" pattern=".*\S+.*" required>
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Title cannot be empty.</div>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <input name="listing[description]" rows="1" cols="1" class="form-control" pattern=".*\S+.*"placeholder="<%=listing.description%>" required></input>
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Description cannot be empty.</div>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Preview Image</label>
+                <div class="mb-3">
+                    <div class="image-preview-container">
+                        <img src="<%=listing.image.url%>" class="image-preview" alt="Listing preview">
+                    </div>
+                </div>
+                <input class="form-control"
+                    name="listing[image]" 
+                    value="<%=listing.image.url%>"
+                    type="file"
+                >
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">image Field cannot be empty.</div>
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Price</label>
+                <input name="listing[price]" value="<%=listing.price%>" class="form-control" type="number" required>
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Price cannot be empty.</div>
+            </div>
+            <div class="row">
+                <!-- Country Dropdown with Search Bar -->
+                <div class="mb-3 col-md-4">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control mb-2" id="countrySearch" placeholder="Search for a country">
+                    <select class="form-control" name="listing[country]" id="country" required>
+                        <option value="">Select Country</option>
+                    </select>
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Please select a Country.</div>
+                </div>
+                <!-- Location Field (updated to handle location search) -->
+                <div class="mb-3 col-md-8">
+                    <label for="location" class="form-label">Location</label>
+                    <!-- Search Input for Location -->
+                    <input type="text" class="form-control mb-2" id="locationSearch" placeholder="Search for a location">
+                    
+                    <!-- Location Dropdown -->
+                    <select class="form-control" name="listing[location]" id="location" required>
+                        <option value="">Select Location</option>
+                    </select>
+                    
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Your Destination</div>
+                </div>
+            </div>
+            <!-- map container -->
+            <div class="mb-3">
+                <label class="form-label" style="font-size: 2rem;">Your Destination</label>
+                <div id="map" style="width: 55%;"></div>
+            </div> 
+            <div class="mb-3">
+                <label class="form-label"style="font-size: 2rem;">Listing Category</label>
+                <div class="category-grid">
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="trending" id="cat-trending" <%= listing.categories.includes('trending') ? 'checked' : '' %>>
+                        <label for="cat-trending">
+                            <i class="fa-solid fa-fire"></i>
+                            <span>Trending</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="rooms" id="cat-rooms" <%= listing.categories.includes('rooms') ? 'checked' : '' %>>
+                        <label for="cat-rooms">
+                            <i class="fa-solid fa-bed"></i>
+                            <span>Rooms</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="historic" id="cat-historic" <%= listing.categories.includes('historic') ? 'checked' : '' %>>
+                        <label for="cat-historic">
+                            <i class="fa-solid fa-landmark"></i>
+                            <span>Historic</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="sea" id="cat-sea" <%= listing.categories.includes('sea') ? 'checked' : '' %>>
+                        <label for="cat-sea">
+                            <i class="fa-solid fa-anchor"></i>
+                            <span>Sea</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="iconic-Cities" id="cat-iconic-cities" <%= listing.categories.includes('iconic-cities') ? 'checked' : '' %>>
+                        <label for="cat-iconic-cities">
+                            <i class="fa-solid fa-mountain-city"></i>
+                            <span>Iconic Cities</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="mountain" id="cat-mountain" <%= listing.categories.includes('mountain') ? 'checked' : '' %>>
+                        <label for="cat-mountain">
+                            <i class="fa-solid fa-mountain"></i>
+                            <span>Mountain</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="castle" id="cat-castle" <%= listing.categories.includes('castle') ? 'checked' : '' %>>
+                        <label for="cat-castle">
+                            <i class="fa-brands fa-fort-awesome"></i>
+                            <span>Castle</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="amazing-pools" id="cat-pools" <%= listing.categories.includes('amazing-pools') ? 'checked' : '' %>>
+                        <label for="cat-pools">
+                            <i class="fa-solid fa-person-swimming"></i>
+                            <span>Amazing Pools</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="camping" id="cat-camping" <%= listing.categories.includes('camping') ? 'checked' : '' %>>
+                        <label for="cat-camping">
+                            <i class="fa-brands fa-free-code-camp"></i>
+                            <span>Camping</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="farms" id="cat-farms" <%= listing.categories.includes('farms') ? 'checked' : '' %>>
+                        <label for="cat-farms">
+                            <i class="fa-solid fa-cow"></i>
+                            <span>Farms</span>
+                        </label>
+                    </div>
+                    <div class="category-item">
+                        <input type="checkbox" name="listing[categories][]" value="arctic" id="cat-arctic" <%= listing.categories.includes('arctic') ? 'checked' : '' %>>
+                        <label for="cat-arctic">
+                            <i class="fa-regular fa-snowflake"></i>
+                            <span>Arctic</span>
+                        </label>
+                    </div>
+                </div>
+            </div>           
+        </div>  
+    </div> 
+                        
+            <button class="btn btn-danger edit-btn col-2 offset-1">Make Changes</button>
+        </form>
+    </div>
+
+    <script>
+
+        // loader logic
+        window.addEventListener('load', function() {
+        const loaderContainer = document.getElementById('loader-container');
+        const contentContainer = document.querySelector('.content-container');
+        const subText = document.querySelector('.sub-text');
+        
+        const loadingMessages = [
+            "Preparing your listing...",
+            "Loading details...",
+            "Getting things ready...",
+            "Almost there...",
+            "Setting up editor..."
+        ];
+
+        let currentIndex = 0;
+
+        function updateSubText() {
+            if (!subText) return;
+            subText.style.opacity = '0';
+            setTimeout(() => {
+                subText.textContent = loadingMessages[currentIndex];
+                subText.style.opacity = '1';
+                currentIndex = (currentIndex + 1) % loadingMessages.length;
+            }, 500);
+        }
+
+        updateSubText();
+        const messageInterval = setInterval(updateSubText, 2000);
+
+        loaderContainer.style.opacity = '1';
+        loaderContainer.style.display = 'flex';
+        contentContainer.style.display = 'none';
+
+        setTimeout(() => {
+            if (loaderContainer && contentContainer) {
+                clearInterval(messageInterval);
+                
+                loaderContainer.style.opacity = '0';
+                loaderContainer.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    loaderContainer.style.display = 'none';
+                    contentContainer.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        contentContainer.classList.add('visible');
+                    }, 50);
+                }, 500);
+            }
+        }, 3000);
+    });
+                // Add to your existing script section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading animation to form submission
+            const form = document.getElementById('listingForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+        
+            form.addEventListener('submit', function() {
+                if(this.checkValidity()) {
+                    submitBtn.innerHTML = `
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Saving Changes...
+                    `;
+                    submitBtn.disabled = true;
+                }
+            });
+        
+            // Add animation to form fields on focus
+            const formControls = document.querySelectorAll('.form-control');
+            formControls.forEach(control => {
+                control.addEventListener('focus', function() {
+                    this.closest('.mb-3').style.transform = 'translateX(10px)';
+                });
+        
+                control.addEventListener('blur', function() {
+                    this.closest('.mb-3').style.transform = 'translateX(0)';
+                });
+            });
+        });
+        // Your existing JavaScript for country and location handling
+        const countrySearch = document.getElementById('countrySearch');
+        const countrySelect = document.getElementById('country');
+        const locationSearch = document.getElementById('locationSearch');
+        const locationSelect = document.getElementById('location');
+        const submitLoading = document.getElementById('submitLoading');
+        const successMessage = document.getElementById('successMessage');
+    
+        // Enhanced form validation and submission
+        document.getElementById('listingForm').addEventListener('submit', async function(event) {
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            this.classList.add('was-validated');
+            
+            if (this.checkValidity()) {
+                submitLoading.style.display = 'inline-block';
+                
+                // Show success message (remove this in production as the form will actually submit)
+                setTimeout(() => {
+                    submitLoading.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
+                }, 1000);
+            }
+        });
+        async function fetchCountries() {
+            try {
+                const response = await fetch('https://restcountries.com/v3.1/all');
+                const countries = await response.json();
+                return countries
+                    .map(country => country.name.common)
+                    .sort();
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+                return [];
+            }
+        }
+    
+        async function fetchCities(country) {
+            try {
+                const response = await fetch(`https://countriesnow.space/api/v0.1/countries/cities`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ country })
+                });
+                const data = await response.json();
+                return data.data.sort();
+            } catch (error) {
+                console.error('Error fetching cities:', error);
+                return [];
+            }
+        }
+    
+        function filterOptions(searchInput, selectElement, options) {
+            const searchTerm = searchInput.value.toLowerCase();
+            selectElement.innerHTML = '<option value="">Select</option>';
+            
+            options
+                .filter(option => option.toLowerCase().includes(searchTerm))
+                .forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    selectElement.appendChild(optionElement);
+                });
+        }
+    
+        async function initializeDropdowns() {
+            const countries = await fetchCountries();
+            
+            countrySearch.addEventListener('input', () => {
+                filterOptions(countrySearch, countrySelect, countries);
+            });
+    
+            countrySelect.addEventListener('change', async () => {
+                const selectedCountry = countrySelect.value;
+                if (selectedCountry) {
+                    locationSelect.innerHTML = '<option value="">Loading locations...</option>';
+                    const cities = await fetchCities(selectedCountry);
+                    locationSelect.innerHTML = '<option value="">Select Location</option>';
+                    cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        locationSelect.appendChild(option);
+                    });
+                }
+            });
+    
+            locationSearch.addEventListener('input', () => {
+                const cities = Array.from(locationSelect.options)
+                    .map(option => option.value)
+                    .filter(value => value !== '');
+                filterOptions(locationSearch, locationSelect, cities);
+            });
+    
+            filterOptions(countrySearch, countrySelect, countries);
+        }
+        document.addEventListener('DOMContentLoaded', initializeDropdowns);
+     // Initialize the map
+     var map = L.map('map').setView([51.505, -0.09], 13);
+
+// Add a tile layer to the map (OpenStreetMap)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Add a marker to the map
+var marker = L.marker([51.505, -0.09]).addTo(map)
+    .bindPopup('Your Location')
+    .openPopup();
+
+// Update map based on location and country fields
+document.getElementById('location').addEventListener('change', updateMap);
+document.getElementById('country').addEventListener('change', updateMap);
+
+function updateMap() {
+    var location = document.getElementById('location').value;
+    var country = document.getElementById('country').value;
+    if (location && country) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location},${country}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    var lat = data[0].lat;
+                    var lon = data[0].lon;
+                    map.setView([lat, lon], 13);
+                    marker.setLatLng([lat, lon]);
+                    marker.bindPopup(`${location}, ${country}`).openPopup();
+                }
+            });
+    }
+}
+</script>
+</body>
+</html>

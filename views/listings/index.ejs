@@ -1,0 +1,511 @@
+<% layout("/layouts/boilerplates.ejs")%>
+<style>
+    .filter-container {
+        position: relative;
+        width: 100%;
+        padding: 1rem 0;
+    }
+
+    .filter-wrapper {
+        position: relative;
+        overflow: hidden;
+        padding: 0 40px;
+    }
+    #filters{
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 1rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    #filters::-webkit-scrollbar {
+    display: none;
+    }
+    .filter {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        min-width: 80px;
+    }
+    .filter.active {
+    transform: scale(1.1);
+    border-bottom: 2px solid #ffc8c8 ;
+    background: rgba(33, 150, 243, 0.1);
+    }
+    .filter i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #666;
+    }
+    .filter p {
+        margin: 0;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .filter:hover {
+        cursor: pointer;
+        transform: translateY(-2px);
+        background-color: #fff0f0;
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+    .nav-btn-filter {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1;
+    }
+    .prev-btn {
+        left: 5px;
+    }
+
+    .next-btn {
+        right: 5px;
+    }
+
+    .nav-btn:hover {
+        background: #f0f0f0;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-btn:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .nav-btn i {
+        color: #666;
+    }
+    #loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    }
+
+    .traveler {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+    }
+
+    .backpack {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background: #FFC107;
+        border-radius: 10px;
+        transform-origin: center;
+        animation: bounce 1s ease-in-out infinite alternate;
+    }
+
+    .backpack::after {
+        content: '✈️';
+        position: absolute;
+        font-size: 30px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .world-map {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border: 4px solid #fff;
+        border-radius: 50%;
+        top: 30px;
+        left: -10px;
+        opacity: 0.3;
+        animation: rotate 10s linear infinite;
+    }
+
+    .loading-text {
+        margin: 20px 0;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .loading-text span {
+        display: inline-block;
+        animation: wave 1.5s infinite;
+        animation-delay: calc(.1s * var(--i));
+    }
+
+    .sub-text {
+        color: #fff;
+        font-size: 1.2rem;
+        opacity: 0;
+        animation: fadeIn 2s ease-in forwards;
+        animation-delay: 1s;
+    }
+
+    @keyframes bounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-20px); }
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes wave {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+<body style="background: linear-gradient(120deg, #fff5f5 60%, #fff0f0 88%,
+#fff5f5 40%, rgba(255, 245, 245, 0.603) 48%);">
+    <!-- Add Loader -->
+    <div id="loader-wrapper">
+    <div class="traveler">
+        <div class="backpack"></div>
+        <div class="world-map"></div>
+    </div>
+    <div class="loading-text">
+        <span>W</span><span>a</span><span>n</span><span>d</span><span>e</span><span>r</span><span>l</span><span>u</span><span>s</span><span>t</span>
+    </div>
+    <div class="sub-text">Your journey begins here...</div>
+</div>
+    <!-- filter-container -->
+    <div class="filter-container">
+        <div class="filter-wrapper">
+            <div id="filters">
+                <div class="filter"data-category="trending">
+                    <div><i class="fa-solid fa-fire"></i></div>
+                    <p>Trending</p>
+                </div>
+                <div class="filter"data-category="rooms">
+                    <div><i class="fa-solid fa-bed"></i></div>
+                    <p>Rooms</p>
+                </div>
+                <div class="filter"data-category="historic">
+                    <div><i class="fa-solid fa-landmark"></i></div>
+                    <p>Historic</p>
+                </div>
+                <div class="filter"data-category="sea">
+                    <div><i class="fa-solid fa-anchor"></i></div>
+                    <p>Sea</p>
+                </div>
+                <div class="filter"data-category="iconic-cities">
+                    <div><i class="fa-solid fa-mountain-city"></i></div>
+                    <p>Iconic Cities</p>
+                </div>
+                <div class="filter"data-category="mountain">
+                    <div><i class="fa-solid fa-mountain"></i></div>
+                    <p>Mountain</p>
+                </div>
+                <div class="filter"data-category="castle">
+                    <div><i class="fa-brands fa-fort-awesome"></i></div>
+                    <p>Castle</p>
+                </div>
+                <div class="filter"data-category="amazing-pools">
+                    <div><i class="fa-solid fa-person-swimming"></i></div>
+                    <p>Amazing pools</p>
+                </div>
+                <div class="filter"data-category="camping">
+                    <div><i class="fa-brands fa-free-code-camp"></i></div>
+                    <p>Camping</p>
+                </div>
+                <div class="filter"data-category="farms">
+                    <div><i class="fa-solid fa-cow"></i></div>
+                    <p>Farms</p>
+                </div>
+                <div class="filter"data-category="arctic">
+                    <div><i class="fa-regular fa-snowflake"></i></div>
+                    <p>Arctic</p>
+                </div>
+            </div>
+            <button class="nav-btn-filter prev-btn" aria-label="Previous filters">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="nav-btn-filter next-btn" aria-label="Next filters">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+    <!-- Main container -->
+    <div class="listing-container">
+        <!-- Grid system for responsive layout -->
+        <div class="row row-cols-lg-3 row-cols-md-3 row-cols-sm-1 mt-3">
+            <% for (let listing of allListings){ %>
+                <!-- Individual card column -->
+                <div class="col mb-4">
+                    <!-- Flip card container -->
+                    <div class="flip-card" data-categories="<%= listing.categories.join(' ') %>">
+                        <div class="flip-card-inner">
+                            <!-- Front of card -->
+                            <div class="flip-card-front">
+                                <div class="card-image">
+                                    <img src="<%=listing.image.url%>" alt="<%=listing.title%>">
+                                </div>
+                                <div class="card-content">
+                                    <h5 class="title-in-box"><%=listing.title%></h5>
+                                    <p class="price-box">
+                                        <span class="price-bullet">&#8226;</span>
+                                        <span class="price-amount">&#8377;<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Back of card -->
+                            <div class="flip-card-back">
+                                <a href="/listings/<%=listing._id%>" class="listing-link">
+                                    <div class="card-image">
+                                        <img src="<%=listing.image.url%>" alt="<%=listing.title%>">
+                                    </div>
+                                    <div class="card-img-overlay">
+                                        <button class="back-button">
+                                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                            </svg>
+                                            <span>Explore me</span>
+                                        </button>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    
+
+    <script>
+        // Loader
+        document.addEventListener('DOMContentLoaded', function() {
+    const loader = document.getElementById('loader-wrapper');
+    const content = document.querySelector('.listing-container');
+    const loadingText = document.querySelector('.loading-text');
+    
+    // Check if this is the first visit
+    const hasVisited = sessionStorage.getItem('hasVisitedIndex');
+    
+    if (!hasVisited) {
+        // First visit - show loader
+        content.classList.add('content-hidden');
+        
+        // Add animation delay to each letter
+        loadingText.querySelectorAll('span').forEach((span, index) => {
+            span.style.setProperty('--i', index);
+        });
+
+        function hideLoader() {
+            loader.style.opacity = '0';
+            content.classList.remove('content-hidden');
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }
+
+        // Hide loader after animation
+        setTimeout(hideLoader, 2500);
+        
+        // Set visited flag
+        sessionStorage.setItem('hasVisitedIndex', 'true');
+    } else {
+        // Not first visit - hide loader immediately
+        loader.style.display = 'none';
+        content.classList.remove('content-hidden');
+    }
+    });
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize DOM elements
+    const filters = document.querySelectorAll('.filter');
+    const listings = document.querySelectorAll('.flip-card');
+    const filterContainer = document.getElementById('filters');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    const searchInput = document.getElementById('searchInput');
+    let activeFilter = null;
+    let debounceTimer;
+
+    // Filter click handling
+    filters.forEach(filter => {
+        filter.addEventListener('click', function() {
+            const category = this.dataset.category;
+            
+            if (activeFilter === this) {
+                this.classList.remove('active');
+                activeFilter = null;
+                showAllListings();
+            } else {
+                if (activeFilter) {
+                    activeFilter.classList.remove('active');
+                }
+                this.classList.add('active');
+                activeFilter = this;
+                filterListings(category);
+            }
+        });
+    });
+
+    // Filter functions
+    function filterListings(category) {
+        listings.forEach(listing => {
+            const categories = listing.dataset.categories?.split(' ') || [];
+            if (categories.includes(category)) {
+                listing.classList.remove('hidden');
+            } else {
+                listing.classList.add('hidden');
+            }
+        });
+        rearrangeListings();
+    }
+
+    function showAllListings() {
+        const originalOrder = Array.from(listings).map(listing => listing.closest('.col'));
+        const container = document.querySelector('.row');
+        
+        // Clear the container
+        container.innerHTML = '';
+        
+        // Add all listings back in their original order
+        originalOrder.forEach(col => {
+            container.appendChild(col);
+        });
+        
+        listings.forEach(listing => {
+            listing.classList.remove('hidden');
+        });
+    }
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            if (activeFilter) {
+                activeFilter.classList.remove('active');
+                activeFilter = null;
+            }
+            
+            if (searchTerm.length >= 2) {
+                listings.forEach(listing => {
+                    const title = listing.querySelector('.title-in-box')?.textContent.toLowerCase() || '';
+                    const categories = listing.dataset.categories?.toLowerCase() || '';
+                    
+                    if (title.includes(searchTerm) || categories.includes(searchTerm)) {
+                        listing.classList.remove('hidden');
+                    } else {
+                        listing.classList.add('hidden');
+                    }
+                });
+                rearrangeListings();
+            } else {
+                showAllListings();
+            }
+        }, 300);
+    });
+
+    // Clear search on escape key
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            showAllListings();
+        }
+    });
+
+    // Horizontal scroll navigation
+    const scrollAmount = 300;
+    
+    prevBtn.addEventListener('click', () => {
+        filterContainer.scrollBy({
+            left: -scrollAmount,
+            behavior: 'smooth'
+        });
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        filterContainer.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+    });
+
+    // Check scroll position
+    filterContainer.addEventListener('scroll', () => {
+        const scrollLeft = filterContainer.scrollLeft;
+        const scrollWidth = filterContainer.scrollWidth;
+        const clientWidth = filterContainer.clientWidth;
+
+        prevBtn.style.opacity = scrollLeft > 0 ? '1' : '0';
+        nextBtn.style.opacity = scrollLeft < (scrollWidth - clientWidth - 10) ? '1' : '0';
+    });
+
+    // Initial button state
+    prevBtn.style.opacity = '0';
+    nextBtn.style.opacity = filterContainer.scrollWidth > filterContainer.clientWidth ? '1' : '0';
+
+    // Updated rearrangeListings function to maintain order from the beginning
+    function rearrangeListings() {
+        const container = document.querySelector('.row');
+        const allCols = Array.from(listings).map(listing => listing.closest('.col'));
+        
+        // Clear the container
+        container.innerHTML = '';
+        
+        // Add visible listings in their original order
+        allCols.forEach(col => {
+            const listing = col.querySelector('.flip-card');
+            if (!listing.classList.contains('hidden')) {
+                container.appendChild(col);
+            }
+        });
+    }
+});
+    </script>
+        <style>
+            @keyframes fadeIn {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(20px); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+            }
+        </style>
+
+</body>

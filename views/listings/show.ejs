@@ -1,0 +1,388 @@
+<% layout("/layouts/boilerplates.ejs")%>
+
+<!-- loader styling-->
+<style>
+    .rating-btn {
+    position: relative;
+    min-width: 100px;
+}
+
+.button-text, .button-loader {
+    transition: opacity 0.3s ease;
+}
+
+.button-loader {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.rating-btn.loading .button-text {
+    opacity: 0;
+}
+
+.rating-btn.loading .button-loader {
+    display: inline-block !important;
+}
+
+@keyframes spin {
+    0% { transform: translateX(-50%) rotate(0deg); }
+    100% { transform: translateX(-50%) rotate(360deg); }
+}
+/* loader styling */
+/* Add before existing styles */
+#page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.animation {
+    font: bold 200% Consolas, Monaco, monospace;
+    border-right: .1em solid black;
+    width: 26ch;
+    margin: 2em 2em;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: typing 2s steps(26, end),
+               blink-caret .5s step-end infinite alternate;
+}
+
+.sub-text {
+    font-size: 1.2em;
+    color: #666;
+    margin-top: 1em;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 2s;
+}
+
+@keyframes typing {
+    from { width: 0 }
+}
+
+@keyframes blink-caret {
+    50% { border-color: transparent }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+</style>
+
+
+<body style="background: linear-gradient(120deg, #fff5f5 60%, #fff0f0 88%,
+       #fff5f5 40%, rgba(255, 245, 245, 0.603) 48%);;">
+  <!-- loader -->
+  <div id="page-loader">
+    <div class="animation">Welcome to <%= listing.title %>!</div>
+    <div class="sub-text"></div>
+  </div>
+
+    <div class="container listing-container main-content">
+        <div class="row">
+          <!-- Title -->
+          <div class="col-8 offset-3 mb-4">
+            <h3 class="animate__animated animate__fadeInLeft"><%= listing.title %></h3>
+          </div>
+    
+          <!-- Card -->
+          <div class="card col-6 offset-3 show-card shadow-lg rounded-3 animate__animated animate__fadeIn">
+            <img src="<%= listing.image.url %>" alt="Listing Image"
+              class="card-img-top show-img">
+            <div class="card-body">
+              <p class="card-text">
+                <%= listing.description %><br><br>
+                &#8226; &#8377;<%= listing.price.toLocaleString("en-IN") %><br>
+                &#8226; <%= listing.location %><br>
+                &#8226; <%= listing.country %><br>
+                <p class="owner-info">Owned By <i><%= listing.owner.username %></i></p>
+              </p>
+            </div>
+          </div>
+    <%if(currentUser && currentUser._id.equals(listing.owner._id)){%>
+          <!-- Buttons -->
+          <div class="btns mt-4">
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-primary col-md-2 offset-3">Edit</a>
+            <form method="post" action="/listings/<%= listing._id %>?_method=DELETE" style="display: inline;">
+              <button class="btn btn-outline-danger">Delete</button>
+            </form>
+          </div>
+    <%}%>
+    <!-- map container -->
+    <div class="row">
+        <div class="col-8 offset-3 mb-3" style="width:53.5%;">
+            <div id="map"></div>
+        </div>
+    </div>
+      <%if(currentUser){%>
+          <!-- Review Form -->
+          <div class="col-8 offset-3 mt-5">
+            <h5 class="animate__animated animate__fadeInUp">Leave a review</h5>
+            <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation" id="listingForm">
+              <div class="mb-3">
+                <div class="star-rating-container">
+                <label for="rating" class="form-label"></label>
+                  <div class="star-rating">
+                    <input type="radio" name="review[rating]" value="5" id="rate-5">
+                    <label for="rate-5" class="fas fa-star"></label>
+                    <input type="radio" name="review[rating]" value="4" id="rate-4">
+                    <label for="rate-4" class="fas fa-star"></label>
+                    <input type="radio" name="review[rating]" value="3" id="rate-3">
+                    <label for="rate-3" class="fas fa-star"></label>
+                    <input type="radio" name="review[rating]" value="2" id="rate-2">
+                    <label for="rate-2" class="fas fa-star"></label>
+                    <input type="radio" name="review[rating]" value="1" id="rate-1" required>
+                    <label for="rate-1" class="fas fa-star"></label>
+                    <div class="invalid-feedback">Please select a star</div> 
+                </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="comment" class="form-label">Comment</label>
+                <input type="text" id="comment" class="form-control" aria-describedby="comment"
+                  name="review[comment]" pattern=".*\S+.*" required>
+                <div class="invalid-feedback">Please enter a comment.</div>
+              </div>
+              <button class="btn btn-outline-dark rating-btn" id="submitReview">
+                  <span class="button-text">Submit</span>
+                  <span class="button-loader" style="display: none;">
+                      <i class="fas fa-circle-notch fa-spin"></i>
+                  </span>
+              </button>
+            </form> 
+          </div>
+         <%}%>
+        </div>
+      </div>
+      <br><br>
+      <!-- review card -->
+      <% if (listing.reviews.length == 0) { %>
+        <h4>No Reviews</h4>
+      <% } else { %>  
+        <h4><%=listing.reviews.length%> Reviews</h4>
+      <% } %>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <% for(review of listing.reviews) { %>
+                <div class="col">
+                    <div class="card review-card shadow-lg rounded-3 p-3 animate__animated animate__fadeIn">
+                         <div class="d-flex align-items-center mb-2">
+                            <div class="stars-display">
+                                <% for(let i = 1; i <= 5; i++) { %>
+                                    <i class="fas fa-star <%= i <= review.rating ? 'checked' : '' %>"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <p class="mb-2 text-secondary fw-semibold">"<%=review.comment%>"</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="author">
+                                <small>@<%=review.author.username%></small>
+                            </div>
+                            <div class="text-end text-muted">
+                              <small>2025-01-26</small>
+                            </div>
+                            <%if(currentUser){%>
+                            <form action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                            <%}%>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>           
+    </div>
+
+
+    <script>
+        
+           // Page load animation
+    document.addEventListener('DOMContentLoaded', function() {
+    const loader = document.getElementById('page-loader');
+    const mainContent = document.querySelector('.main-content');
+    const subText = document.querySelector('.sub-text');
+    
+    // Check if this listing has been visited
+    const listingId = '<%= listing._id %>'; // Get the current listing ID
+    const hasVisitedListing = sessionStorage.getItem(`visited_${listingId}`);
+    
+    if (!hasVisitedListing) {
+        // First visit to this listing - show loader
+        mainContent.style.display = 'none';
+        
+        const loadingMessages = [
+            "Loading amazing details...",
+            "Getting everything ready...",
+            "Almost there..."
+        ];
+
+        let currentIndex = 0;
+
+        function updateSubText() {
+            if (!subText) return;
+            subText.textContent = loadingMessages[currentIndex];
+            currentIndex = (currentIndex + 1) % loadingMessages.length;
+        }
+
+        updateSubText();
+        const messageInterval = setInterval(updateSubText, 1000);
+
+        setTimeout(() => {
+            clearInterval(messageInterval);
+            loader.style.opacity = '0';
+            loader.style.transition = 'opacity 0.5s ease';
+            mainContent.style.display = 'block';
+            
+            setTimeout(() => {
+                loader.style.display = 'none';
+                mainContent.style.opacity = '1';
+            }, 500);
+        }, 3000);
+
+        // Mark this listing as visited
+        sessionStorage.setItem(`visited_${listingId}`, 'true');
+    } else {
+        // Not first visit - hide loader immediately
+        loader.style.display = 'none';
+        mainContent.style.display = 'block';
+        mainContent.style.opacity = '1';
+    }
+    }); 
+      
+    //<!-- logic for connecting the review star with the value display --> 
+        document.querySelectorAll('.star-rating input').forEach(input => {
+            input.addEventListener('change', function() {
+                let value = this.value;
+                let labels = document.querySelectorAll('.star-rating label');
+                
+                labels.forEach(label => {
+                    label.style.animation = 'none';
+                    label.offsetHeight; // Trigger reflow
+                    label.style.animation = null;
+                });
+            });
+        });
+        // fonction to validate the form  and prevent submission
+        (() => {
+            'use strict'
+        
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+        
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+                }
+        
+                form.classList.add('was-validated')
+            }, false)
+            })
+        })()
+
+// prevent user from entering only blank spaces in an html input
+document.getElementById('listingForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    // Form validation
+    if (!this.checkValidity()) {
+        event.stopPropagation();
+        this.classList.add('was-validated');
+        return;
+    }
+
+    // Check for blank spaces
+    const inputs = this.querySelectorAll('input[required]');
+    let hasBlankInputs = false;
+    
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            input.value = '';
+            input.classList.add('is-invalid');
+            hasBlankInputs = true;
+        }
+    });
+
+    if (hasBlankInputs) return;
+
+    // Show loader in submit button
+    const submitButton = document.getElementById('submitReview');
+    const buttonLoader = submitButton.querySelector('.button-loader');
+    const buttonText = submitButton.querySelector('.button-text');
+
+    submitButton.classList.add('loading');
+    submitButton.disabled = true;
+    buttonLoader.style.display = 'inline-block';
+    buttonText.style.opacity = '0';
+
+    try {
+        // Add small delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Submit the form
+        this.submit();
+    } catch (error) {
+        console.error('Submission error:', error);
+        // Reset button state on error
+          submitButton.classList.remove('loading');
+          submitButton.disabled = false;
+          buttonLoader.style.display = 'none';
+          buttonText.style.opacity = '1';
+      }
+  });
+
+    // Input validation on typing
+    document.querySelectorAll('input[required]').forEach(input => {
+        input.addEventListener('input', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+    console.log('Coordinates:',' <%= listing.geometry.coordinates[1] %>', '<%= listing.geometry.coordinates[0]%>');
+
+        // Map initialization
+        const coordinates = {
+            lat: '<%= listing.geometry.coordinates[1] %>',
+            lng: '<%= listing.geometry.coordinates[0] %>'
+        };
+
+        console.log('Coordinates:', coordinates.lat, coordinates.lng);
+
+        // Initialize the map with listing coordinates
+        const map = L.map('map').setView([coordinates.lat, coordinates.lng], 13);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add marker for the listing location
+        const marker = L.marker([coordinates.lat, coordinates.lng]).addTo(map);
+
+        // Add popup with location information
+        marker.bindPopup(`<strong>${'<%= listing.location %>'}</strong><br>${'<%= listing.country %>'}`).openPopup();
+</script>
+</body>
